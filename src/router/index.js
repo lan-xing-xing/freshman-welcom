@@ -1,10 +1,16 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
+// 1.安装vue-router插件
 Vue.use(Router)
 
 /* Layout */
 import Layout from '@/layout'
+import gjjyRouter from './modules/gjjy'
+import jtRouter from './modules/jt'
+import tmgcRouter from './modules/tmgc'
+import qdRouter from './modules/qd'
+import ysRouter from './modules/ys'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -30,6 +36,8 @@ import Layout from '@/layout'
  * a base page that does not have permission requirements
  * all roles can be accessed
  */
+// 所有权限通用路由表
+// 登录页，首页，404
 export const constantRoutes = [
   {
     path: '/login',
@@ -37,138 +45,221 @@ export const constantRoutes = [
     hidden: true
   },
 
-  {
-    path: '/404',
-    component: () => import('@/views/404'),
-    hidden: true
-  },
+  // {
+  //   path: '/404',
+  //   component: () => import('@/views/404'),
+  //   hidden: true
+  // },
 
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/主页',
     children: [{
-      path: 'dashboard',
+      path: '主页',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: '主页', icon: 'dashboard' }
     }]
-  },
+  }
+  // { path: '*', redirect: '/404', hidden: true }
+]
 
+/**
+ * asyncRoutes
+ * the routes that need to be dynamically loaded based on user roles
+ */
+// 异步挂载的路由
+// 动态需要根据权限加载的路由表
+export const asyncRoutes = [
+  // 全校学生信息（权限super-admin）
   {
-    path: '/example',
-    component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
-    children: [
-      {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
-      }
-    ]
-  },
-
-  {
-    path: '/form',
+    path: '/schoolStudent',
     component: Layout,
     children: [
       {
         path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
+        name: 'schoolStudent',
+        component: () => import('@/views/schoolstudent/index'),
+        meta: {
+          title: '全校学生信息',
+          icon: 'form',
+          roles: ['super-admin']
+        }
       }
     ]
   },
 
+  // 全院学生信息（权限college-admin）
   {
-    path: '/nested',
+    path: '/collegeStudent',
     component: Layout,
-    redirect: '/nested/menu1',
-    name: 'Nested',
+    children: [
+      {
+        path: 'index',
+        name: 'collegeStudent',
+        component: () => import('@/views/collegestudent'),
+        meta: {
+          title: '全院学生信息',
+          icon: 'form',
+          roles: ['college-admin']
+        }
+      }
+    ]
+  },
+
+  // 各全院学生信息（权限super-admin）
+  {
+    path: '/allCollegeStudent',
+    component: Layout,
+    redirect: '/allCollegeStudent/guojiao',
     meta: {
-      title: 'Nested',
-      icon: 'nested'
+      title: '各学院学生信息',
+      icon: 'form',
+      roles: ['super-admin']
+    },
+    children: [
+      gjjyRouter,
+      jtRouter,
+      qdRouter,
+      ysRouter,
+      tmgcRouter
+    ]
+  },
+
+  // 各专业学生信息（权限college-admin）
+  {
+    path: '/allMajorStudent',
+    component: Layout,
+    redirect: '/allMajorStudent/guojiao',
+    meta: {
+      title: '各专业学生信息',
+      icon: 'form',
+      roles: ['college-admin']
+    },
+    children: [
+      gjjyRouter,
+      jtRouter,
+      qdRouter,
+      ysRouter,
+      tmgcRouter
+    ]
+  },
+
+  // 某专业学生信息（权限professional-admin）
+  {
+    path: '/studentInformation',
+    component: Layout,
+    redirect: '/studentInformation/majorStudent',
+    name: 'studentInformation',
+    meta: {
+      title: '学生基本信息',
+      icon: 'example',
+      roles: ['professional-admin']
     },
     children: [
       {
-        path: 'menu1',
-        component: () => import('@/views/nested/menu1/index'), // Parent router-view
-        name: 'Menu1',
-        meta: { title: 'Menu1' },
-        children: [
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nested/menu1/menu1-1'),
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nested/menu1/menu1-2'),
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: () => import('@/views/nested/menu1/menu1-3'),
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
+        path: 'majorStudent',
+        name: 'majorStudent',
+        component: () => import('@/views/majorstudent'),
+        meta: { title: '全部学生信息', icon: 'table' }
       },
       {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        meta: { title: 'menu2' }
+        path: 'classManagement',
+        name: 'classManagement',
+        component: () => import('@/views/classmanagement'),
+        meta: { title: '班级管理', icon: 'table' }
+      },
+      {
+        path: 'tutorManagement',
+        name: 'tutorManagement',
+        component: () => import('@/views/tutormanagement'),
+        meta: { title: '班主任管理', icon: 'table' }
+      },
+      {
+        path: 'notReport',
+        name: 'notReport',
+        component: () => import('@/views/notreport'),
+        meta: { title: '未报到学生', icon: 'table' }
+      },
+      {
+        path: 'loanCheck',
+        name: 'loanCheck',
+        component: () => import('@/views/loancheck'),
+        meta: { title: '贷款审核', icon: 'documentation' }
       }
     ]
   },
 
+  // 迎新现场（权限professional-admin）
   {
-    path: 'external-link',
+    path: '/offline',
     component: Layout,
+    redirect: '/offline/registerCheck',
+    name: 'offline',
+    meta: {
+      title: '迎新现场',
+      icon: 'guide',
+      roles: ['professional-admin']
+    },
     children: [
       {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
+        path: 'pay',
+        name: 'pay',
+        component: () => import('@/views/pay'),
+        meta: { title: '财务缴费', icon: 'money' }
+      },
+      {
+        path: 'registerCheck',
+        name: 'registerCheck',
+        component: () => import('@/views/registercheck'),
+        meta: { title: '注册核验', icon: 'people' }
       }
     ]
   },
 
-  // 404 page must be placed at the end !!!
+  // 数据统计（权限三种权限管理员）
+  {
+    path: '/dataStatistics',
+    component: Layout,
+    redirect: '/dataStatistics/reportRate',
+    name: 'dataStatistics',
+    meta: { title: '数据统计', icon: 'chart' },
+    children: [
+      {
+        path: 'reportRate',
+        name: 'reportRate',
+        component: () => import('@/views/reportrate'),
+        meta: { title: '新生报到率', icon: 'chart' }
+      },
+      {
+        path: 'provincesRate',
+        name: 'provincesRate',
+        component: () => import('@/views/provincesrate'),
+        meta: { title: '各省比例', icon: 'example' }
+      },
+      {
+        path: 'genderRate',
+        name: 'genderRate',
+        component: () => import('@/views/genderrate'),
+        meta: { title: '男女生比例', icon: 'peoples' }
+      }
+    ]
+  },
+
+  // 404页面，必须放在最后
   { path: '*', redirect: '/404', hidden: true }
 ]
 
 const createRouter = () => new Router({
-  // mode: 'history', // require service support
+  // 使用html5中的history，去掉url中的#
+  mode: 'hash', // require service support
   scrollBehavior: () => ({ y: 0 }),
-  routes: constantRoutes
+  base: '/freshman-welcome',
+  routes: constantRoutes // 实例化vue时只挂载通用路由表
 })
 
+// 2.创建一个router
 const router = createRouter()
 
 // Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
@@ -177,4 +268,5 @@ export function resetRouter() {
   router.matcher = newRouter.matcher // reset router
 }
 
+// 3.导出router
 export default router

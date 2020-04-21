@@ -5,7 +5,11 @@ import { resetRouter } from '@/router'
 const state = {
   token: getToken(),
   name: '',
-  avatar: ''
+  avatar: '',
+  roles: [],
+  introduction: '',
+  path: '',
+  globalUrl: 'http://localhost:8089'
 }
 
 const mutations = {
@@ -17,6 +21,15 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_ROLES: (state, roles) => {
+    state.roles = roles
+  },
+  SET_INTRODUCTION: (state, introduction) => {
+    state.introduction = introduction
+  },
+  SET_PATH: (state, path) => {
+    state.path = path
   }
 }
 
@@ -41,15 +54,18 @@ const actions = {
     return new Promise((resolve, reject) => {
       getInfo(state.token).then(response => {
         const { data } = response
-
+        console.log({ data })
         if (!data) {
           reject('Verification failed, please Login again.')
         }
 
-        const { name, avatar } = data
+        const { roles, name, avatar, introduction, path } = data
 
+        commit('SET_ROLES', roles)
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
+        commit('SET_INTRODUCTION', introduction)
+        commit('SET_PATH', path)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -62,6 +78,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
         commit('SET_TOKEN', '')
+        commit('SET_ROLES', [])
         removeToken()
         resetRouter()
         resolve()
@@ -75,6 +92,7 @@ const actions = {
   resetToken({ commit }) {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
+      commit('SET_ROLES', [])
       removeToken()
       resolve()
     })

@@ -41,6 +41,7 @@ const actions = {
 }
 
 export default {
+  // 解决模块命名冲突，使用时需要加上模块名
   namespaced: true,
   state,
   mutations,
